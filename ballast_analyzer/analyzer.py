@@ -75,6 +75,12 @@ def analyze_ballast(filename):
 
     aspect_ratio = longest / shortest
 
+    # Calculate the volume of the bounding box
+    bounding_box_volume = dimensions[0] * dimensions[1] * dimensions[2]
+
+    # Calculate the Angularity Index (AI)
+    angularity_index = model.volume / bounding_box_volume
+
     data = {'Filename': filename,
             'Intermediate': intermediate,
             'Shortest': shortest,
@@ -90,6 +96,7 @@ def analyze_ballast(filename):
             'Center Z': center[2],
             'Radius': radius,
             'Aspect Ratio': aspect_ratio,
+            'angularity index': angularity_index,
             }
 
 

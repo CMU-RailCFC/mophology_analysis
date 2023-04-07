@@ -33,13 +33,15 @@ def analyze_all_files_in_folder(folder_path, file_extension=".obj"):
         print("Sphere fit:", ((result["Center X"], result["Center Y"], result["Center Z"]), result["Radius"]))
         print("Angularity Index:", result["Angularity Index"])
         print("Aspect Ratio:", result["Aspect Ratio"])
+
+
         print("\n---\n")
 
 folder_path = "path/to/your/folder"
 analyze_all_files_in_folder(folder_path)
 '''
 #option 2
-result = analyze_ballast('F15_1/untitled.obj')
+result = analyze_ballast('U15_1/U15_1.stl')
 # Print the results in the desired format
 print("subjectname:", result["Filename"])
 print("Intermediate:", result["Intermediate"])
@@ -54,6 +56,5 @@ print("Roughness:", result["Roughness"])
 print("Sphere center:", (result["Center X"], result["Center Y"], result["Center Z"]))
 print("Sphere radius:", result["Radius"])
 print("Sphere fit:", ((result["Center X"], result["Center Y"], result["Center Z"]), result["Radius"]))
-print("Angularity Index:", result["Angularity Index"])
+print("Angularity Index:", result["angularity index"])
 print("Aspect Ratio:", result["Aspect Ratio"])
-
