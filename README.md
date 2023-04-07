@@ -33,23 +33,19 @@
 	- ## to install the environment (if you don't have environtment)
 		- scenario 1 (for who have Anaconda or conda)
 			- to install the environment into the conda please use
-			-
 			  ```
 			  conda env create -f environment.yml
 			  ```
 			- to use the environment
-			-
 			  ```
 			  conda activate cenv
 			  ```
 		- scenario 2 (for normal python profile)
 			- Use `pip` to install the environment in `requirements.txt` follow in this command
-			-
 			  ```
 			  pip install -r requirements.txt
 			  ```
 	- ## to run the code:
-			-
 			  ```
 			  python3 test.py
 			  ```
