@@ -31,7 +31,7 @@
 			  ```
 		- ### NOTE
 			- please make sure the the function that you use is collect if you use the code for analyze the `.obj` just avoid this step, but if other please edit the eight line to you collect 3d type file in `test.py`.
-			- there are 2 option to run the code in `test.py` if you are run each single file please use `option 2` (that I already use). whereas you need to delete the `'''` in line 7 and 40 and/or `'''` or delete the `option 2`.
+			- there are 2 option to run the code in `test.py` if you are run each single file please use `option 2` (that I already use). whereas you need to delete the `'''` in line 7 and 40 and/or `'''` or delete the `option 2` to use `option 1` for analyze a hole folder.
 				- in the `option 1` you need to get direction the folder which is the directory for store the 3d file. in line 38 follow in `line 38`.
 				-
 				  ``` python
