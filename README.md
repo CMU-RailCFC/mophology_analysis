@@ -1,7 +1,7 @@
 - # morphology_analysis
 	- ## this is the morphology analysis
 	- prerequirement
-		- python version 3
+		- python 3
 		- numpy
 		- scipy
 		- trimesh
