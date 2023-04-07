@@ -2,11 +2,11 @@
 	- ## this is the morphology analysis
 		the CMURail CFC mophology analysis is the tool for analyze the ballast or 3D object. We have developed a Python package that analyzes the morphology of ballast samples. The package uses the `trimesh` library to process 3D models of the samples and calculates various morphological properties, such as elongation, flatness, convexity, sphericity, roughness, and roundness. The package is designed to process multiple 3D models in a folder, saving the results to a CSV file for further analysis.
 
-Throughout our conversation, we have discussed various aspects of the package, including refactoring the code, improving the analysis, and creating a package structure. We have also covered the addition of grain size distribution, porosity, and permeability factors, which are not included in the current package because they require experimental data from the lab. The package is now more organized and easier to use, with clearer instructions and documentation.
+		Throughout our conversation, we have discussed various aspects of the package, including refactoring the code, improving the analysis, and creating a package structure. We have also covered the addition of grain size distribution, porosity, and permeability factors, which are not included in the current package because they require experimental data from the lab. The package is now more organized and easier to use, with clearer instructions and documentation.
 
-To make the package accessible and easy to use, make sure to provide a comprehensive README file with instructions on how to set up the environment, install the required packages, and use the package. A requirements.txt file should also be included to facilitate the installation of the necessary dependencies.
+		To make the package accessible and easy to use, make sure to provide a comprehensive README file with instructions on how to set up the environment, install the required packages, and use the package. A requirements.txt file should also be included to facilitate the installation of the necessary dependencies.
 
-This project provides a valuable tool for analyzing ballast samples and can be further expanded to include more advanced analysis methods or integrate experimental data for a more comprehensive understanding of the samples' properties.
+		This project provides a valuable tool for analyzing ballast samples and can be further expanded to include more advanced analysis methods or integrate experimental data for a more comprehensive understanding of the samples' properties.
 
 	- ## Scope of our package
 	 - analyze Intermediate
