@@ -2,7 +2,7 @@ import os
 from ballast_analyzer.analyzer import analyze_ballast
 
 # Use the analyze_ballast function here with the path to your 3D model file
-# to run all obj file in the folder please use the first option second option for run single obj file
+# to run all obj file in the folder please use the first option, the second option for run single obj file
 #option 1
 '''
 def analyze_all_files_in_folder(folder_path, file_extension=".obj"):
