@@ -27,7 +27,6 @@ import trimesh
 import numpy as np
 from scipy.optimize import least_squares
 import csv
-import plotly.graph_objects as go
 
 
 def sphere_fit_function(parameters, points):
@@ -96,7 +95,7 @@ def analyze_ballast(filename):
             'Center Z': center[2],
             'Radius': radius,
             'Aspect Ratio': aspect_ratio,
-            'angularity index': angularity_index,
+            'Angularity Index': angularity_index,
             }
 
 
