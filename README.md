@@ -1,4 +1,7 @@
 - # morphology_analysis
+  	- ## V.1.0.1
+  		we are fix the issue of some the angulrity index and fix the run bug
+
 	- ## this is the morphology analysis
 		the CMURail CFC mophology analysis is the tool for analyze the ballast or 3D object. We have developed a Python package that analyzes the morphology of ballast samples. The package uses the `trimesh` library to process 3D models of the samples and calculates various morphological properties, such as elongation, flatness, convexity, sphericity, roughness, and roundness. The package is designed to process multiple 3D models in a folder, saving the results to a CSV file for further analysis.
 
