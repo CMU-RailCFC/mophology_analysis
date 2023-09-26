@@ -27,6 +27,7 @@ import trimesh
 import numpy as np
 from scipy.optimize import least_squares
 import csv
+from concurrent.futures import ProcessPoolExecutor
 
 
 def sphere_fit_function(parameters, points):
@@ -117,6 +118,16 @@ def analyze_ballast(filename):
         writer.writerow(data)
 
     return data
+
+
+def analyze_multiple_files(filenames):
+    with ProcessPoolExecutor() as executor:
+        results = list(executor.map(analyze_ballast, filenames))
+    return results
+
+if __name__ == "__main__":
+    # List of sample files to be analyzed (this can be extended)
+    files_to_analyze = ['/path/to/file1.stl', '/path/to/file2.stl']  # Replace with actual file paths
 
 
 if __name__ == "__main__":
