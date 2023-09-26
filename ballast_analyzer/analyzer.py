@@ -70,7 +70,7 @@ def analyze_ballast(filename):
     mean_dist = np.mean(dists - radius)
 
     roughness = mean_dist
-    roundness = 1 - (mean_dist / radius)
+    roundness = (mean_dist / radius)
 
     aspect_ratio = longest / shortest
 
