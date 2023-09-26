@@ -74,11 +74,17 @@ def analyze_ballast(filename):
 
     aspect_ratio = longest / shortest
 
-    # Calculate the volume of the bounding box
-    bounding_box_volume = dimensions[0] * dimensions[1] * dimensions[2]
+    # Compute the actual volume of the model
+    actual_volume = model.volume
 
-    # Calculate the Angularity Index (AI)
-    angularity_index = model.volume / bounding_box_volume
+    # Compute the volume of its bounding box
+    bounding_box = model.bounding_box_oriented
+    bounding_box_dimensions = bounding_box.extents
+    bounding_box_volume = bounding_box_dimensions[0] * bounding_box_dimensions[1] * bounding_box_dimensions[2]
+
+
+    # Calculate the Angularity Index
+    angularity_index = actual_volume / bounding_box_volume
 
     data = {'Filename': filename,
             'Intermediate': intermediate,
