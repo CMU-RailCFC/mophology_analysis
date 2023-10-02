@@ -25,9 +25,9 @@ NO COMERCAIL LICENCE ANYMORE
 import os
 import trimesh
 import numpy as np
-from scipy.optimize import least_squares
 import csv
-
+from scipy.optimize import least_squares
+from concurrent.futures import ProcessPoolExecutor
 
 def sphere_fit_function(parameters, points):
     center_x, center_y, center_z, radius = parameters
@@ -35,78 +35,62 @@ def sphere_fit_function(parameters, points):
     residual = np.linalg.norm(points - center, axis=1) - radius
     return residual
 
-
 def fit_sphere(points):
     center = np.mean(points, axis=0)
-    radius = np.mean(np.linalg.norm(points, axis=1))
+    radius = np.mean(np.linalg.norm(points - center, axis=1))
     initial_guess = np.array([center[0], center[1], center[2], radius])
     result = least_squares(sphere_fit_function, initial_guess, args=(points,))
     return result.x[0:3], result.x[3]
 
-
 def analyze_ballast(filename):
     model = trimesh.load(filename)
-
     surface_vertices = model.vertices
     center, radius = fit_sphere(surface_vertices)
-
+    
     dimensions = model.bounding_box.primitive.extents
     intermediate = (dimensions[0] + dimensions[1] + dimensions[2]) / 3
     shortest = min(dimensions)
     longest = max(dimensions)
-    surface_area = model.area
-
-    elongation = longest / intermediate
-    flatness = (shortest / intermediate) ** 2
+    
+    elongation = intermediate / longest
+    flatness = shortest / intermediate
     convexity = model.convex_hull.volume / model.volume
-    sphericity = (3 * (4 * np.pi * model.volume) / (surface_area ** 2)) ** (1/3)
-
+    sphericity = (3 * (4 * np.pi * model.volume) / (model.area ** 2)) ** (1/3)
+    
     dists = np.linalg.norm(surface_vertices - center, axis=1)
     mean_dist = np.mean(dists - radius)
-
-    surface_vertices = model.vertices
-    convex_hull = model.convex_hull
-    dists = np.linalg.norm(surface_vertices - center, axis=1)
-    mean_dist = np.mean(dists - radius)
-
     roughness = mean_dist
     roundness = (mean_dist / radius)
-
+    
     aspect_ratio = longest / shortest
-
-    # Compute the actual volume of the model
     actual_volume = model.volume
-
-    # Compute the volume of its bounding box
+    
     bounding_box = model.bounding_box_oriented
     bounding_box_dimensions = bounding_box.extents
-    bounding_box_volume = bounding_box_dimensions[0] * bounding_box_dimensions[1] * bounding_box_dimensions[2]
-
-
-    # Calculate the Angularity Index
+    bounding_box_volume = np.prod(bounding_box_dimensions)
+    
     angularity_index = actual_volume / bounding_box_volume
-
-    data = {'Filename': filename,
-            'Intermediate': intermediate,
-            'Shortest': shortest,
-            'Longest': longest,
-            'Elongation': elongation,
-            'Flatness': flatness,
-            'Convexity': convexity,
-            'Sphericity': sphericity,
-            'Roundness': roundness,
-            'Roughness': roughness,
-            'Center X': center[0],
-            'Center Y': center[1],
-            'Center Z': center[2],
-            'Radius': radius,
-            'Aspect Ratio': aspect_ratio,
-            'Angularity Index': angularity_index,
-            }
-
-
+    
+    data = {
+        'Filename': filename,
+        'Intermediate': intermediate,
+        'Shortest': shortest,
+        'Longest': longest,
+        'Elongation': elongation,
+        'Flatness': flatness,
+        'Convexity': convexity,
+        'Sphericity': sphericity,
+        'Roundness': roundness,
+        'Roughness': roughness,
+        'Center X': center[0],
+        'Center Y': center[1],
+        'Center Z': center[2],
+        'Radius': radius,
+        'Aspect Ratio': aspect_ratio,
+        'Angularity Index': angularity_index,
+    }
+    
     csv_file_path = 'data.csv'
-
     if not os.path.isfile(csv_file_path):
         with open(csv_file_path, 'w', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=data.keys())
@@ -115,10 +99,10 @@ def analyze_ballast(filename):
     with open(csv_file_path, 'a', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=data.keys())
         writer.writerow(data)
-
+    
     return data
 
-
-if __name__ == "__main__":
-    result = analyze_ballast('F15_1/untitled.obj')
-    print(result)
+def analyze_multiple_files(filenames, num_cores=None):
+    with ProcessPoolExecutor(max_workers=num_cores) as executor:
+        results = list(executor.map(analyze_ballast, filenames))
+    return results
