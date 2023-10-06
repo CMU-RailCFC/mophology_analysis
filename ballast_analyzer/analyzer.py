@@ -28,6 +28,7 @@ import numpy as np
 import csv
 from scipy.optimize import least_squares
 from concurrent.futures import ProcessPoolExecutor
+from sklearn.decomposition import PCA
 
 class BallastAnalyzer:
     def __init__(self):
@@ -103,7 +104,20 @@ class BallastAnalyzer:
                 'Radius': radius,
                 'Aspect Ratio': aspect_ratio,
                 'Angularity Index': angularity_index,
+                'Volume': actual_volume,  # Added volume
+                'Surface Area': model.area  # Added surface area
             }
+
+            # PCA for principal axes of variation
+            pca = PCA(n_components=3)
+            pca.fit(surface_vertices)
+            principal_axes = pca.components_
+
+            data.update({
+                'Principal Axis 1': principal_axes[0].tolist(),
+                'Principal Axis 2': principal_axes[1].tolist(),
+                'Principal Axis 3': principal_axes[2].tolist()
+            })
 
             csv_file_path = 'data.csv'
             if not os.path.isfile(csv_file_path):

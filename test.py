@@ -10,6 +10,11 @@ def analyze_single_file(analyzer, file_path):
     if result:
         for key, value in result.items():
             print(f"{key}: {value}")
+            
+            # Print PCA results
+            if "Principal Axis" in key:
+                print(f"{key}: {value}")
+
         print("\n---\n")
 
 def analyze_all_files_in_folder(analyzer, folder_path, num_cores=None, file_extension=".stl"):
@@ -24,6 +29,11 @@ def analyze_all_files_in_folder(analyzer, folder_path, num_cores=None, file_exte
                 if result:
                     for key, value in result.items():
                         print(f"{key}: {value}")
+                        
+                        # Print PCA results
+                        if "Principal Axis" in key:
+                            print(f"{key}: {value}")
+
                     print("\n---\n")
         except Exception as e:
             logging.error(f"An error occurred while analyzing the file {file}: {e}")
@@ -31,10 +41,6 @@ def analyze_all_files_in_folder(analyzer, folder_path, num_cores=None, file_exte
 
 # Create an analyzer object
 analyzer = BallastAnalyzer()
-
-# Analyzing a single file
-# single_file_path = "/path/to/your/single/model/file.stl"
-# analyze_single_file(analyzer, single_file_path)
 
 # Analyzing all files in a folder
 folder_path = "/home/railcmuvpn/Documents/Morphology_CFC/model"
