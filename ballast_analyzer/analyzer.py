@@ -32,6 +32,7 @@ from sklearn.decomposition import PCA
 
 class BallastAnalyzer:
     def __init__(self):
+        self.csv_file_path = 'data/data.csv'  # Updated the path to store the CSV in the accessible directory
         pass
 
     def _sphere_fit_function(self, parameters, points):
