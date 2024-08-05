@@ -29,6 +29,8 @@ import csv
 from scipy.optimize import least_squares
 from concurrent.futures import ProcessPoolExecutor
 
+np.random.seed(0)  # Set random seed for reproducibility
+
 def sphere_fit_function(parameters, points):
     center_x, center_y, center_z, radius = parameters
     center = np.array([center_x, center_y, center_z])
