@@ -19,6 +19,9 @@ THE KNOWLEDGE OF SOURCE WILL BE ONLY CMURAIL CFC
 ## please check the evironment and packet is cover in the requirement.txt (manualto install is in readme)
 
 NO COMERCAIL LICENCE ANYMORE
+
+
+for cite or reference: 10.1088/1755-1315/1332/1/012016
 '''
 
 
