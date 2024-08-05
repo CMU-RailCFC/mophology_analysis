@@ -71,6 +71,12 @@ def analyze_ballast(filename):
     
     angularity_index = actual_volume / bounding_box_volume
     
+    # Adding bounding box orientation analysis
+    bounding_box_orientation = bounding_box.primitive.transform
+    orientation_x = bounding_box_orientation[0, 0]
+    orientation_y = bounding_box_orientation[1, 1]
+    orientation_z = bounding_box_orientation[2, 2]
+    
     data = {
         'Filename': filename,
         'Intermediate': intermediate,
@@ -88,6 +94,9 @@ def analyze_ballast(filename):
         'Radius': radius,
         'Aspect Ratio': aspect_ratio,
         'Angularity Index': angularity_index,
+        'Orientation X': orientation_x,
+        'Orientation Y': orientation_y,
+        'Orientation Z': orientation_z,
     }
     
     csv_file_path = 'data.csv'
