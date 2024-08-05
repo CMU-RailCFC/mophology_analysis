@@ -64,3 +64,7 @@
 				  result = analyze_ballast('F15_1/untitled.obj')
 				  ```
 		- the result will be in term of the `data.csv` you can edit the direction and name in`ballast_analyzer` from `analyzer.py`
+ 
+  - # for cite and reference my work:
+    - 10.1088/1755-1315/1332/1/012016
+    - https://iopscience.iop.org/article/10.1088/1755-1315/1332/1/012016/meta 
