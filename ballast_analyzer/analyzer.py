@@ -109,6 +109,146 @@ def calculate_angularity_index_3d_relative(radii, equivalent_ellipsoid):
     return angularity_index, angularity_index_normalized
 
 # ============================================================================
+# NEW FUNCTIONS FOR CORRECTED ANGULARITY INDEX 2 (ADDITIONS)
+# ============================================================================
+
+def fit_true_equivalent_ellipsoid(vertices):
+    """
+    Fits a true ellipsoid to a set of 3D points (vertices) using PCA.
+    This determines the center, orientation, and semi-axes lengths of the best-fit ellipsoid.
+    """
+    if vertices is None or len(vertices) < 3:
+        return None
+    center = np.mean(vertices, axis=0)
+    centered_vertices = vertices - center
+    covariance_matrix = np.cov(centered_vertices, rowvar=False)
+    eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
+    sort_indices = np.argsort(eigenvalues)[::-1]
+    eigenvalues = eigenvalues[sort_indices]
+    eigenvectors = eigenvectors[:, sort_indices]
+    # The semi-axes lengths correspond to the standard deviation along each principal axis
+    semi_axes_lengths = np.sqrt(eigenvalues)
+    return {
+        'center': center,
+        'semi_axes': semi_axes_lengths,
+        'rotation': eigenvectors
+    }
+
+def calculate_ellipsoid_radii_by_directions(ellipsoid_props, directions):
+    """
+    Calculates the radius of a given ellipsoid for a set of 3D directions.
+    """
+    if not ellipsoid_props:
+        return np.zeros(len(directions))
+    
+    semi_axes = ellipsoid_props['semi_axes']
+    rotation_inv = ellipsoid_props['rotation'].T # Transpose of orthogonal matrix is its inverse
+
+    ellipsoid_radii = []
+    for d_world in directions:
+        d_local = rotation_inv @ d_world # Transform direction to ellipsoid's local coordinates
+        
+        # Ellipsoid radius formula: r = 1 / sqrt( (dx/a)^2 + (dy/b)^2 + (dz/c)^2 )
+        a, b, c = semi_axes
+        # Add epsilon to prevent division by zero for flat objects
+        term_a = (d_local[0] / (a + 1e-9))**2
+        term_b = (d_local[1] / (b + 1e-9))**2
+        term_c = (d_local[2] / (c + 1e-9))**2
+        
+        radius_sq_inv = term_a + term_b + term_c
+        if radius_sq_inv <= 0:
+             radius = 0.0
+        else:
+             radius = 1 / np.sqrt(radius_sq_inv)
+        ellipsoid_radii.append(radius)
+        
+    return np.array(ellipsoid_radii)
+
+def calculate_ellipsoid_based_angularity(mesh_radii, ellipsoid_radii):
+    """
+    Calculates Angularity Index 2 based on deviations from a true fitted ellipsoid.
+    """
+    # Ensure no division by zero for the relative deviation
+    safe_ellipsoid_radii = np.where(ellipsoid_radii <= 1e-9, 1.0, ellipsoid_radii)
+    
+    deviations = np.abs(mesh_radii - ellipsoid_radii) / safe_ellipsoid_radii
+    angularity_index2 = np.sum(deviations)
+    
+    # Optional: Normalized version
+    max_dev = np.max(deviations)
+    if max_dev > 0:
+        angularity_index2_normalized = angularity_index2 / (len(mesh_radii) * max_dev)
+    else:
+        angularity_index2_normalized = 0.0
+            
+    return angularity_index2, angularity_index2_normalized
+
+# ============================================================================
+# NEW FUNCTION FOR KUO & FREEMAN (2000) ANGULARITY INDEX (ADDITION)
+# ============================================================================
+
+def calculate_angularity_Kuo2000(mesh):
+    """
+    Calculates the angularity index based on the definition by Kuo & Freeman (2000).
+    AI = SE / SC
+    - SE: Surface area of an ellipsoid with the same volume as the particle.
+    - SC: Surface area of the particle's convex hull.
+    Note: This index behaves more like a sphericity/form factor.
+    """
+    try:
+        # The calculation requires a watertight mesh to have a valid volume.
+        if not mesh.is_watertight:
+            debug_print("Mesh is not watertight, cannot calculate Kuo & Freeman Angularity.", "WARNING")
+            return 0.0
+
+        # Get the particle's volume (needed for the equivalent-volume ellipsoid)
+        particle_volume = mesh.volume
+        if particle_volume <= 0:
+            return 0.0
+
+        # 1. Calculate SC: Surface area of the Smallest Circumscribed convex polygon (Convex Hull)
+        sc_surface_area = mesh.convex_hull.area
+        if sc_surface_area <= 0:
+            return 0.0
+
+        # 2. Calculate SE: Surface area of an Ellipsoid possessing the same volume as the particle
+        
+        # 2a. First, find the proportions of the particle by fitting a true ellipsoid
+        ellipsoid_props = fit_true_equivalent_ellipsoid(mesh.vertices)
+        if not ellipsoid_props:
+            return 0.0
+        
+        a_fit, b_fit, c_fit = ellipsoid_props['semi_axes']
+        
+        # 2b. Calculate the volume of this best-fit ellipsoid
+        fit_ellipsoid_volume = (4/3) * np.pi * a_fit * b_fit * c_fit
+        if fit_ellipsoid_volume <= 0:
+            return 0.0
+
+        # 2c. Find the scaling factor 'k' to create an ellipsoid with the same volume as the particle
+        # V_particle = (4/3)*pi*(k*a_fit)*(k*b_fit)*(k*c_fit) = k^3 * V_fit
+        k = (particle_volume / fit_ellipsoid_volume)**(1/3)
+        
+        # 2d. Calculate the semi-axes of the new equivalent-volume ellipsoid
+        a_eq, b_eq, c_eq = k * a_fit, k * b_fit, k * c_fit
+        
+        # 2e. Calculate the surface area of this new ellipsoid using Knud Thomsen's approximation
+        p = 1.6075
+        term1 = (a_eq**p * b_eq**p)
+        term2 = (a_eq**p * c_eq**p)
+        term3 = (b_eq**p * c_eq**p)
+        se_surface_area = 4 * np.pi * ((term1 + term2 + term3) / 3)**(1/p)
+
+        # 3. Calculate the final index
+        AI_Kuo = se_surface_area / sc_surface_area
+        
+        return max(0.0, min(1.0, AI_Kuo)) # The result should theoretically be <= 1
+
+    except Exception as e:
+        debug_print(f"Failed to calculate Kuo & Freeman Angularity: {e}", "ERROR")
+        return 0.0
+
+# ============================================================================
 # FIXED AND ROBUST ROUNDNESS CALCULATION METHODS
 # ============================================================================
 
@@ -1061,7 +1201,30 @@ def analyze_ballast_with_robust_roundness(filename,
         radii = calculate_radii_by_3d_directions(model, center, directions_3d)
         equivalent_ellipsoid = fit_equivalent_ellipsoid(radii)
         angularity_index, angularity_index_normalized = calculate_angularity_index_3d_relative(radii, equivalent_ellipsoid)
-        
+
+        # =================================================
+        # PASTE THE NEW CODE BLOCK BELOW THIS LINE
+        # =================================================
+
+        # --- NEW: Calculation for Corrected Angularity Index 2 (Ellipsoid-based) ---
+        debug_print("Calculating Ellipsoid-based Angularity Index 2...")
+        ellipsoid_props = fit_true_equivalent_ellipsoid(model.vertices)
+        if ellipsoid_props:
+            # Radii of the fitted ellipsoid in the same directions as the mesh radii
+            ellipsoid_radii = calculate_ellipsoid_radii_by_directions(ellipsoid_props, directions_3d)
+          
+            # The 'radii' variable from the mesh measurement is reused here
+            angularity_index2, angularity_index2_normalized = calculate_ellipsoid_based_angularity(radii, ellipsoid_radii)
+        else:
+            # Fallback if ellipsoid fitting fails
+            angularity_index2, angularity_index2_normalized = 0, 0
+            debug_print("Ellipsoid fitting failed, Angularity Index 2 set to 0", "WARNING")
+        # --- End of New Calculation ---
+        # --- NEW: Calculation for Kuo & Freeman (2000) Angularity Index ---
+        debug_print("Calculating Kuo & Freeman (2000) Angularity Index...")
+        angularity_index_kuo = calculate_angularity_Kuo2000(model)
+
+
         # Create results dictionary
         data = {
             'Filename': filename,
@@ -1106,6 +1269,10 @@ def analyze_ballast_with_robust_roundness(filename,
             'Radius': radius,
             'Angularity Index': angularity_index,
             'Normalized Angularity Index': angularity_index_normalized,
+            #Add Angularity
+            'Angularity_Index_2_Ellipsoid_Based': angularity_index2,
+            'Normalized_Angularity_Index_2': angularity_index2_normalized,
+            'Angularity_Index_Kuo2000': angularity_index_kuo,
             'Surface Area': surface_area,
             'Volume': volume,
             'Number of Faces': len(model.faces),
